@@ -1,0 +1,26 @@
+{
+    "name": "com.sevalkr.cloudsave",
+    "displayName": "SK Cloud Save Kit",
+    "version": "0.1.0",
+    "unity": "2021.3",
+    "description": "Unified cloud saves for Google Play Saved Games and iCloud, with deterministic pluggable conflict resolution, local-first offline sync, corruption detection.",
+    "keywords": [
+        "cloud save",
+        "save game",
+        "google play games",
+        "icloud",
+        "sync",
+        "conflict resolution"
+    ],
+    "author": {
+        "name": "sevalkr"
+    },
+    "license": "MIT",
+    "samples": [
+        {
+            "displayName": "Basic Usage",
+            "description": "Save, load and sync with playtime tracking in a single MonoBehaviour.",
+            "path": "Samples~/BasicUsage"
+        }
+    ]
+}

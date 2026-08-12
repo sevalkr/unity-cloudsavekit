@@ -1,0 +1,22 @@
+{
+    "name": "SK.CloudSave",
+    "rootNamespace": "SK.CloudSave",
+    "references": [
+        "Google.Play.Games"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.google.play.games",
+            "expression": "",
+            "define": "CLOUDSAVEKIT_GPGS"
+        }
+    ],
+    "noEngineReferences": false
+}
