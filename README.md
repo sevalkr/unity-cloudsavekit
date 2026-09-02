@@ -16,8 +16,8 @@ iOS, behind one small API, with the parts every game actually needs:
   every user with an iCloud account, no Game Center prompt.
 - **Automated Xcode setup.** A build post-processor adds the iCloud entitlement to the
   generated project; no manual capability clicking per build.
-- **A real test suite.** The core is pure C# with zero UnityEngine dependencies,
-  covered by EditMode tests that run in CI.
+- **A real test suite.** The core is pure C# with zero UnityEngine dependencies, so its
+  tests run on plain .NET in CI, on every push, with no Unity license.
 
 ```csharp
 using SK.CloudSave;
@@ -84,7 +84,7 @@ total playtime · writer id · payload · CRC-32
 
 - **Schema version** is yours: bump `CloudSaveOptions.SchemaVersion` when your save
   format changes, and read `LoadReport.Metadata.SchemaVersion` to migrate old saves.
-- **Total playtime** is the strongest conflict signal a progression game has — unlike
+- **Total playtime** is the strongest conflict signal a progression game has. Unlike
   wall clocks it never goes backwards, so it's immune to devices with wrong clocks.
 - **Writer id** is a random GUID persisted per installation (deliberately *not*
   `deviceUniqueIdentifier`, which has privacy implications).
@@ -147,6 +147,30 @@ thread**: set a flag and act on it from `Update`, or use your main thread dispat
 - The package's own EditMode tests appear in the Test Runner when you add the package
   to `testables` in your project's `manifest.json`.
 
+## The package's own tests
+
+The suite is split by what CI can actually verify.
+
+The core tests run on plain .NET, on every push and PR. Since the core has no
+UnityEngine dependencies, [`.ci/CloudSaveKit.Tests.csproj`](.ci/CloudSaveKit.Tests.csproj)
+compiles `Runtime/Core`, `Runtime/Providers/Local` and `Tests/Editor` into an ordinary
+NUnit project:
+
+```
+dotnet test .ci/CloudSaveKit.Tests.csproj
+```
+
+That covers the envelope, the resolvers, the manager's sync logic and the file backed
+local store, with no Unity license and no Editor. The project pins `LangVersion 9.0`,
+the C# version Unity 2021.3 compiles, so CI rejects syntax the real target can't build.
+NUnit stays on 3.x to match the API the Unity Test Framework ships, so the same test
+files compile in both places.
+
+Everything that needs UnityEngine is verified by hand in the Editor:
+`CloudSaveKitFactory`, the iOS post-processor, the Google Play and iCloud providers, and
+the Play Mode fake-cloud pipeline. The [Status](#status) table says which of those have
+been run on a real device.
+
 
 ## Limits & trade-offs
 
@@ -163,18 +187,21 @@ thread**: set a flag and act on it from `Update`, or use your main thread dispat
 
 ## Status
 
-Honest state of things, per layer:
+Honest state of things, per layer, and how each one is verified:
 
-| Layer | Status |
-|---|---|
-| Core (envelope, resolvers, manager, local store) | ✅ Fully unit-tested |
-| Editor fake-cloud pipeline | ✅ Tested |
-| Google Play provider | ⚠️ Written against GPGS v2 0.11.x, reviewed, **not yet device-verified** |
-| iCloud provider + Objective-C bridge | ⚠️ Written against documented APIs, reviewed, **not yet device-verified** |
-| Xcode post-processor | ⚠️ **Not yet verified against a real Xcode build** |
+| Layer | Status | Verified by |
+|---|---|---|
+| Core (envelope, resolvers, manager, local store) | ✅ Fully unit-tested | Automated, `dotnet test` in CI on every push |
+| Editor fake-cloud pipeline | ✅ Tested | Manual, Play Mode in the Editor |
+| `CloudSaveKitFactory` + Unity glue | ✅ Tested | Manual, Editor only, needs UnityEngine |
+| Google Play provider | ⚠️ Written against GPGS v2 0.11.x, reviewed, **not yet device-verified** | Manual, Editor compile only |
+| iCloud provider + Objective-C bridge | ⚠️ Written against documented APIs, reviewed, **not yet device-verified** | Manual, Editor compile only |
+| Xcode post-processor | ⚠️ **Not yet verified against a real Xcode build** | Manual, Editor compile only |
 
-Device verification reports (and fixes) are the most valuable contribution right now —
-issues and PRs welcome.
+Only the first row runs in CI. The rest needs someone to open the Editor.
+
+Device verification reports (and fixes) are the most valuable contribution right now.
+Issues and PRs welcome.
 
 ## License
 

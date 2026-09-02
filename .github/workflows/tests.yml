@@ -1,10 +1,5 @@
-# Runs the EditMode test suite on every push and PR.
-#
-# Requires repository secrets for Unity licensing (see https://game.ci/docs/github/activation):
-#   UNITY_LICENSE  — contents of a .ulf personal license file
-#   UNITY_EMAIL / UNITY_PASSWORD — the Unity account it belongs to
-#
-# The package is mounted into a minimal test project so game-ci can run it.
+# Core tests on plain .NET. The core has no UnityEngine dependencies, so this needs
+# no Unity license. The Unity-only layers are verified in the Editor.
 name: tests
 
 on:
@@ -13,51 +8,14 @@ on:
   pull_request:
 
 jobs:
-  editmode-tests:
-    name: EditMode tests (Unity 2021.3)
+  core-tests:
+    name: Core tests (.NET 8)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: package
+      - uses: actions/checkout@v4
 
-      - name: Create host test project
-        run: |
-          mkdir -p testproject/Assets testproject/Packages testproject/ProjectSettings
-          cat > testproject/Packages/manifest.json << 'MANIFEST'
-          {
-            "dependencies": {
-              "com.sevalkr.cloudsave": "file:../../package",
-              "com.unity.test-framework": "1.1.33"
-            },
-            "testables": ["com.sevalkr.cloudsave"]
-          }
-          MANIFEST
-          echo "m_EditorVersion: 2021.3.45f1" > testproject/ProjectSettings/ProjectVersion.txt
-
-      - name: Cache Library
-        uses: actions/cache@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          path: testproject/Library
-          key: library-2021.3.45f1-${{ hashFiles('package/package.json') }}
-          restore-keys: library-2021.3.45f1-
+          dotnet-version: '8.0.x'
 
-      - name: Run EditMode tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: testproject
-          unityVersion: 2021.3.45f1
-          testMode: editmode
-          artifactsPath: test-results
-
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: test-results
+      - run: dotnet test .ci/CloudSaveKit.Tests.csproj

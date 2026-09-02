@@ -41,15 +41,16 @@ namespace SK.CloudSave.Providers
             string tempPath = finalPath + TempExtension;
 
             File.WriteAllBytes(tempPath, data);
-#if UNITY_2021_2_OR_NEWER || NETSTANDARD2_1 || NET5_0_OR_GREATER
-            File.Move(tempPath, finalPath);
-#else
+
+            // Replace is atomic but needs the destination to exist, so a first save moves.
             if (File.Exists(finalPath))
             {
-                File.Delete(finalPath);
+                File.Replace(tempPath, finalPath, null);
             }
-            File.Move(tempPath, finalPath);
-#endif
+            else
+            {
+                File.Move(tempPath, finalPath);
+            }
         }
 
         public bool Delete(string slot)

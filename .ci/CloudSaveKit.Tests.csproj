@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Runs the core tests on plain .NET, no Unity license needed.
+       Usage: dotnet test .ci/CloudSaveKit.Tests.csproj -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- Unity 2021.3 compiles C# 9, so CI catches syntax it can't build. -->
+    <LangVersion>9.0</LangVersion>
+    <RollForward>Major</RollForward>
+    <AssemblyName>CloudSaveKit.Tests</AssemblyName>
+    <RootNamespace>SK.CloudSave.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <!-- Runtime/Unity, Editor, Samples~ and the GooglePlay/ICloud providers need
+       UnityEngine and are left out. -->
+  <ItemGroup>
+    <Compile Include="../Runtime/Core/**/*.cs" />
+    <Compile Include="../Runtime/Providers/Local/**/*.cs" />
+    <Compile Include="../Tests/Editor/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NUnit 3.x matches the API Unity ships. 4.x moved the classic asserts. -->
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+  </ItemGroup>
+
+</Project>
