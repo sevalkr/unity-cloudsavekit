@@ -35,7 +35,7 @@ LoadReport load = await saves.LoadAsync("main");    // reconciles local vs cloud
 Install via the Unity Package Manager using a Git URL:
 
 ```
-https://github.com/sevalkr/cloudsavekit.git
+https://github.com/sevalkr/unity-cloudsavekit.git
 ```
 
 The package installs as `com.sevalkr.cloudsave` ("SK Cloud Save Kit" in the Package
